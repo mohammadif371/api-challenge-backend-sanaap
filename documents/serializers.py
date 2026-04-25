@@ -1,3 +1,4 @@
+from documents.services import MinioService
 from rest_framework import serializers
 from .models import Document
 
@@ -21,8 +22,13 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
     def get_url(self, obj):
-        # URL امن از MinIO - بعداً پیاده سازی میکنیم
-        return None
+        if not obj.minio_path:
+            return None
+        try:
+            service = MinioService()
+            return service.get_presigned_url(obj.minio_path)
+        except Exception:
+            return None
 
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
