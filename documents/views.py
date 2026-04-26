@@ -2,6 +2,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Document
 from .serializers import DocumentSerializer, DocumentUploadSerializer
 from .filters import DocumentFilter
@@ -11,16 +13,23 @@ from users.permissions import IsAdmin, IsEditor, IsViewer
 
 
 class DocumentListView(generics.ListAPIView):
-    """
-    GET /api/documents/
-    All authenticated users can list documents
-    Supports filtering and pagination
-    """
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     permission_classes = [IsViewer]
     filter_backends = [DjangoFilterBackend]
     filterset_class = DocumentFilter
+
+    @swagger_auto_schema(
+        operation_summary="List Documents",
+        operation_description="Get all documents - supports filtering and pagination",
+        manual_parameters=[
+            openapi.Parameter('title', openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter('status', openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter('page', openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class DocumentUploadView(generics.CreateAPIView):
@@ -32,6 +41,10 @@ class DocumentUploadView(generics.CreateAPIView):
     permission_classes = [IsEditor]
     parser_classes = [MultiPartParser, FormParser]
 
+    @swagger_auto_schema(
+        operation_summary="Upload Document",
+        operation_description="Editor/Admin only - Upload a new document"
+    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -66,6 +79,13 @@ class DocumentDetailView(generics.RetrieveAPIView):
     serializer_class = DocumentSerializer
     permission_classes = [IsViewer]
 
+    @swagger_auto_schema(
+        operation_summary="Get Document",
+        operation_description="Get a single document with secure URL"
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class DocumentUpdateView(generics.UpdateAPIView):
     """
@@ -77,6 +97,10 @@ class DocumentUpdateView(generics.UpdateAPIView):
     permission_classes = [IsEditor]
     parser_classes = [MultiPartParser, FormParser]
 
+    @swagger_auto_schema(
+        operation_summary="Update Document",
+        operation_description="Editor/Admin only - Update document info or file"
+    )
     def update(self, request, *args, **kwargs):
         document = self.get_object()
         serializer = self.get_serializer(data=request.data, partial=True)
@@ -120,6 +144,10 @@ class DocumentDeleteView(generics.DestroyAPIView):
     queryset = Document.objects.all()
     permission_classes = [IsAdmin]
 
+    @swagger_auto_schema(
+        operation_summary="Delete Document",
+        operation_description="Admin only - Delete a document"
+    )
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
         try:
