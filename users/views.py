@@ -51,8 +51,10 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
         return Response({
             'access': str(refresh.access_token),
+            'swagger_token': f'Bearer {access_token}',
             'refresh': str(refresh),
             'role': user.role
         })

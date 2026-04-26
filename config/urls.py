@@ -19,8 +19,6 @@ schema_view = get_schema_view(
         - **editor**: Upload and update documents
         - **viewer**: Read only
         """,
-        contact=openapi.Contact(email="admin@dms.com"),
-        license=openapi.License(name="MIT License"),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],

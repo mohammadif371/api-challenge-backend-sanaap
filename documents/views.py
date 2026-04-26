@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import Document
-from .serializers import DocumentSerializer, DocumentUploadSerializer
+from .serializers import DocumentSerializer, DocumentUpdateSerializer
 from .filters import DocumentFilter
 from .services import MinioService
 from .tasks import upload_document_task
@@ -37,7 +37,7 @@ class DocumentUploadView(generics.CreateAPIView):
     POST /api/documents/upload/
     Only admin and editor can upload
     """
-    serializer_class = DocumentUploadSerializer
+    serializer_class = DocumentUpdateSerializer
     permission_classes = [IsEditor]
     parser_classes = [MultiPartParser, FormParser]
 
@@ -93,7 +93,7 @@ class DocumentUpdateView(generics.UpdateAPIView):
     Only admin and editor can update
     """
     queryset = Document.objects.all()
-    serializer_class = DocumentUploadSerializer
+    serializer_class =  DocumentUpdateSerializer
     permission_classes = [IsEditor]
     parser_classes = [MultiPartParser, FormParser]
 
