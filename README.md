@@ -119,7 +119,8 @@ Swagger UI: `http://localhost:8000/swagger/`
 |--------|----------|------|-------------|
 | POST | `/api/login/` | Public | Get JWT token |
 | GET | `/api/documents/` | All | List documents |
-| POST | `/api/documents/upload/` | Admin, Editor | Upload document |
+| POST | `/api/documents/upload/` | Admin, Editor | Upload single document |
+| POST | `/api/documents/batch-upload/` | Admin, Editor | Upload multiple documents |
 | GET | `/api/documents/<id>/` | All | Get document |
 | PATCH | `/api/documents/<id>/update/` | Admin, Editor | Update document |
 | DELETE | `/api/documents/<id>/delete/` | Admin | Delete document |
