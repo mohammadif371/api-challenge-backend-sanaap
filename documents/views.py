@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import Document
-from .serializers import DocumentSerializer, DocumentUpdateSerializer
+from .serializers import DocumentBatchUploadSerializer, DocumentSerializer, DocumentUpdateSerializer
 from .filters import DocumentFilter
 from .services import MinioService
 from .tasks import upload_document_task
@@ -160,3 +160,49 @@ class DocumentDeleteView(generics.DestroyAPIView):
             )
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class DocumentBatchUploadView(generics.CreateAPIView):
+    """
+    POST /api/documents/batch-upload/
+    Upload multiple documents at once
+    Only admin and editor can upload
+    """
+    serializer_class = DocumentBatchUploadSerializer
+    permission_classes = [IsEditor]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        operation_summary="Batch Upload Documents",
+        operation_description="Editor/Admin only - Upload multiple documents at once"
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        files = serializer.validated_data['files']
+        title_prefix = serializer.validated_data.get('title_prefix', 'Document')
+        description = serializer.validated_data.get('description', '')
+
+        documents = []
+        for i, file in enumerate(files):
+            document = Document.objects.create(
+                title=f"{title_prefix} {i + 1} - {file.name}",
+                description=description,
+                file_name=file.name,
+                file_size=file.size,
+                uploaded_by=request.user,
+                status=Document.Status.PENDING
+            )
+            # Send each file to background task
+            upload_document_task.delay(
+                document.id,
+                file.read(),
+                file.name,
+                file.content_type
+            )
+            documents.append(document)
+
+        return Response(
+            DocumentSerializer(documents, many=True).data,
+            status=status.HTTP_201_CREATED
+        )
