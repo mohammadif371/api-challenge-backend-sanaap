@@ -54,3 +54,30 @@ class DocumentUpdateSerializer(serializers.ModelSerializer):
         if value.content_type not in allowed_types:
             raise serializers.ValidationError("File type not allowed")
         return value
+    
+class DocumentBatchUploadSerializer(serializers.Serializer):
+    """Serializer for batch upload - multiple files"""
+    files = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True
+    )
+    title_prefix = serializers.CharField(required=False, default='Document')
+    description = serializers.CharField(required=False, default='')
+
+    def validate_files(self, value):
+        max_size = 10 * 1024 * 1024
+        allowed_types = [
+            'image/jpeg', 'image/png', 'image/gif',
+            'application/pdf', 'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]
+        for file in value:
+            if file.size > max_size:
+                raise serializers.ValidationError(
+                    f"{file.name}: File size must be under 10MB"
+                )
+            if file.content_type not in allowed_types:
+                raise serializers.ValidationError(
+                    f"{file.name}: File type not allowed"
+                )
+        return value

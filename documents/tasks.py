@@ -31,7 +31,7 @@ def upload_document_task(self, document_id: int, file_data: bytes, file_name: st
         document.status = Document.Status.STORED
         document.save()
 
-        # Notify via WebSocket (بعداً اضافه میکنیم)
+        # Notify via WebSocket 
         notify_document_update.delay(document_id, 'created')
 
         return {'status': 'success', 'document_id': document_id}
@@ -52,7 +52,6 @@ def upload_document_task(self, document_id: int, file_data: bytes, file_name: st
 def notify_document_update(document_id: int, action: str):
     """
     Background task to send WebSocket notification
-    بعداً با Django Channels کامل میکنیم
     """
     from channels.layers import get_channel_layer
     from asgiref.sync import async_to_sync
