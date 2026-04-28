@@ -4,8 +4,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class DocumentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        """Client connected to WebSocket"""
-        # All clients join the 'documents' group
+        user = self.scope.get('user')
+        if not user or not user.is_authenticated:
+            await self.close(code=4401)
+            return
+
         await self.channel_layer.group_add(
             'documents',
             self.channel_name
