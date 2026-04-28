@@ -16,6 +16,8 @@ class IsEditor(BasePermission):
 
 
 class IsViewer(BasePermission):
-    """Read only"""
+    """Read only - viewer role"""
     def has_permission(self, request, view):
-        return request.user.is_authenticated
+        return request.user.is_authenticated and (
+            request.user.is_viewer() or request.user.is_editor() or request.user.is_admin()
+        )
