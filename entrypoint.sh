@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "Waiting for PostgreSQL..."
 python << END
@@ -17,8 +18,10 @@ while True:
 END
 
 echo "Running migrations..."
-python manage.py makemigrations
 python manage.py migrate
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
 
 echo "Starting server..."
 exec "$@"

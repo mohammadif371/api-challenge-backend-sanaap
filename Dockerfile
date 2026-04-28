@@ -8,13 +8,12 @@ WORKDIR /app
 COPY packages/ /packages/
 COPY requirements.txt .
 
-RUN pip install --no-index \
+RUN pip install \
+    --no-index \
     --find-links=/packages \
     -r requirements.txt
 
 COPY . .
-
-RUN python manage.py collectstatic --noinput
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
