@@ -6,6 +6,8 @@ from datetime import timedelta
 
 
 class MinioService:
+    _bucket_ensured = False
+
     def __init__(self):
         self.client = Minio(
             endpoint=settings.MINIO_ENDPOINT,
@@ -14,10 +16,11 @@ class MinioService:
             secure=settings.MINIO_SECURE
         )
         self.bucket_name = settings.MINIO_BUCKET_NAME
-        self._ensure_bucket_exists()
+        if not MinioService._bucket_ensured:
+            self._ensure_bucket_exists()
+            MinioService._bucket_ensured = True
 
     def _ensure_bucket_exists(self):
-        """Create bucket if it doesn't exist"""
         try:
             if not self.client.bucket_exists(self.bucket_name):
                 self.client.make_bucket(self.bucket_name)
