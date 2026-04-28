@@ -150,14 +150,15 @@ class DocumentDeleteView(generics.DestroyAPIView):
     )
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
-        try:
-            service = MinioService()
-            service.delete_file(document.minio_path)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        if document.minio_path:
+            try:
+                service = MinioService()
+                service.delete_file(document.minio_path)
+            except Exception as e:
+                return Response(
+                    {'error': str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
