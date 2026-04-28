@@ -5,7 +5,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import Document
-from .serializers import DocumentBatchUploadSerializer, DocumentSerializer, DocumentUpdateSerializer
+from .serializers import (DocumentBatchUploadSerializer,
+                          DocumentSerializer, DocumentUpdateSerializer)
 from .filters import DocumentFilter
 from .services import MinioService
 from .tasks import upload_document_task
@@ -171,11 +172,8 @@ class DocumentBatchUploadView(generics.CreateAPIView):
     serializer_class = DocumentBatchUploadSerializer
     permission_classes = [IsEditor]
     parser_classes = [MultiPartParser, FormParser]
+    swagger_schema = None
 
-    @swagger_auto_schema(
-        operation_summary="Batch Upload Documents",
-        operation_description="Editor/Admin only - Upload multiple documents at once"
-    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
