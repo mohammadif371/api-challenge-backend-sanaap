@@ -103,7 +103,7 @@ class DocumentUpdateView(generics.UpdateAPIView):
     )
     def update(self, request, *args, **kwargs):
         document = self.get_object()
-        serializer = self.get_serializer(data=request.data, partial=True)
+        serializer = self.get_serializer(document, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         # If new file uploaded
